@@ -58,14 +58,21 @@ module CarrierWave
       yield(file, @options.format_options) if block_given?
 
       progress = @options.progress(model)
+      
+      format_params = @options.format_params
+      encoder_options = @options.encoder_options
+      if format == :gif
+        format_params.delete(:resolution)
+        encoder_options = nil
+      end
 
       with_trancoding_callbacks do
         if progress
-          file.transcode(tmp_path, @options.format_params, @options.encoder_options) {
+          file.transcode(tmp_path, format_params, encoder_options) {
               |value| progress.call(value)
           }
         else
-          file.transcode(tmp_path, @options.format_params, @options.encoder_options)
+          file.transcode(tmp_path, format_params, encoder_options)
         end
         File.rename tmp_path, current_path
       end
